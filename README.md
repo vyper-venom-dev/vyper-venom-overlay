@@ -26,22 +26,25 @@ assets/                  backups, not used by the overlay
 
 ## Use the alert overlay
 
-1. On this page: **Code > Download ZIP**, unzip it somewhere permanent on the streaming PC.
-   (Use a downloaded copy, not the github.io address: a page loaded from the web can be blocked from talking to TikFinity.)
-2. In OBS, in every **vertical** (Aitum) scene: add a **Browser** source.
-   - Tick **Local file** and pick `index.html`.
+The overlay is live on GitHub Pages: **https://vyper-venom-dev.github.io/vyper-venom-overlay/**
+
+1. In Aitum Vertical, in every **vertical** scene: add a **Browser** source (create it once, then **Add Existing** in the other scenes).
+   - Leave **Local file** unticked and paste the address above as the URL.
    - Width **1080**, Height **1920**. Put it at the top of the source list.
+   - Untick **Shutdown source when not visible** and **Refresh browser when scene becomes active**.
    - Optional: tick **Control audio via OBS** to give the alert sounds their own volume slider.
-3. Keep **TikFinity** open and connected while streaming. Don't add TikFinity's own alert overlay too, or alerts play twice.
+2. Keep **TikFinity** open and connected while streaming. Don't add TikFinity's own alert overlay too, or alerts play twice.
 
 Events come from TikFinity's local connection at `ws://127.0.0.1:21213/`.
+If the online version can't reach TikFinity (`?debug` never says "connected"), use a downloaded copy instead:
+**Code > Download ZIP**, unzip, tick **Local file** and pick `index.html`.
 
 ## Test it
 
-- `index.html?demo`: plays a follow, share and like alert on a loop with fake names.
-- `index.html?debug`: shows a log of what TikFinity sends. Use this if a real follow doesn't trigger an alert.
+- `?demo` on the end of the address: plays a follow, share and like alert on a loop with fake names.
+- `?debug` on the end of the address: shows a log of what TikFinity sends. Use this if a real follow doesn't trigger an alert.
 
-In OBS, add these to the end of the Local file path, then remove them before going live.
+Remove them before going live.
 
 ## Change settings
 
@@ -52,4 +55,4 @@ Open `index.html` in a text editor and edit the `CONFIG` block near the top:
 
 ## Updating
 
-When something changes here, download the ZIP again and replace the old folder (keep the same location so OBS still finds `index.html`).
+Changes pushed here go live on the Pages address in about a minute. Then right-click the Browser source in OBS > **Refresh**.
