@@ -1,71 +1,96 @@
 # VYPER-VENOM stream kit
 
-Everything for the VYPER-VENOM stream in one place: the TikTok alert overlay (runs in OBS / Aitum Vertical)
-plus a backup of every exported asset.
+Everything for the VYPER-VENOM stream in one place: the alert overlay for Twitch and TikTok (runs from GitHub Pages)
+plus every asset the OBS scenes use.
+
+- Twitch canvas: OBS, 1920 x 1080, 60 fps
+- TikTok canvas: Aitum Vertical, 1080 x 1920, 60 fps
 
 ## What's where
 
 ```
-index.html               alert overlay: TikTok (Aitum, 1080 x 1920) and Twitch (?twitch, OBS, 1920 x 1080)
-alerts/                  the alert videos the overlay plays
-  ALERT_FOLLOW.webm        1080x400, 4 s, transparent, with sound
-  ALERT_SHARE.webm         1080x400, 4 s, transparent, with sound
-  ALERT_LIKE.webm          1080x300, 4 s, transparent, with sound
-  ALERT_SUB/BITS/RAID.webm Twitch alerts (until uploaded, the overlay borrows SHARE/FOLLOW/LIKE)
-fonts/                   Orbitron + Chakra Petch (used by the overlay)
+index.html                 alert overlay, live at https://vyper-venom-dev.github.io/vyper-venom-overlay/
+alerts/                    the alert videos the overlay plays (VP9 WebM, transparent, 4 s, with sound)
+  ALERT_FOLLOW.webm          1080x400   TikTok + Twitch follow
+  ALERT_SHARE.webm           1080x400   TikTok share
+  ALERT_LIKE.webm            1080x300   TikTok like goal
+  ALERT_SUB.webm             1080x400   Twitch sub / resub / gift
+  ALERT_BITS.webm            1080x400   Twitch bits
+  ALERT_RAID.webm            1080x300   Twitch raid
+fonts/                     Orbitron + Chakra Petch (used by the overlay; install them on the PC for OBS text too)
 
-assets/                  backups, not used by the overlay
-  stinger/                 STINGER_TW.webm (Twitch), STINGER_TT.webm (TikTok): OBS transition point 600 ms
-  loops/                   BG_LOOP_TW.mp4, BG_LOOP_TT.mp4: 10 s seamless backgrounds (Media Source, Loop on)
-  logo/                    LOGO_REVEAL.webm
-  overlays/                10 transparent scene overlays (Twitch_*.png 1920x1080, TikTok_*.png 1080x1920)
-  profile-pic/             profile picture for Twitch and TikTok (1000x1000)
-  sounds/                  stinger and alert sound effects (WAV)
-  obs/                     VV_countdown.lua: Starting Soon countdown as MM:SS (Tools > Scripts > +)
-  after-effects/           build script (VYPER-VENOM_Build.jsx), alert layout fix (VYPER-VENOM_Alerts_Fix.jsx),
-                           Twitch alert maker (VYPER-VENOM_Twitch_Alerts.jsx)
-                           and the portrait used in RING
+assets/                    used by OBS from a downloaded copy of this repo
+  overlays/                  10 transparent scene overlays: Twitch_*.png (1920x1080), TikTok_*.png (1080x1920)
+  loops/                     BG_LOOP_TW.mp4, BG_LOOP_TT.mp4: 10 s seamless backgrounds (Media Source, Loop on)
+  stinger/                   STINGER_TW.webm, STINGER_TT.webm: Stinger transition, Transition Point 600 ms
+  obs/                       VV_countdown.lua: Starting Soon countdown as MM:SS (Tools > Scripts > +)
+  profile-pic/               profile picture for Twitch and TikTok (1000x1000; use the non-transparent one)
+  logo/                      LOGO_REVEAL.webm
+  sounds/                    stinger and alert sound effects (WAV)
+  after-effects/             VYPER-VENOM_Build.jsx       builds the loops and all six alerts
+                             VYPER-VENOM_Alerts_Fix.jsx  layout fix for alerts built before 13 Oct
+                             VYPER-VENOM_Twitch_Alerts.jsx  makes sub/bits/raid from finished alerts
+                             face_venom.png              the portrait used in the RING comp
 ```
 
-## Use the alert overlay
+**Keep the downloaded copy in one place.** OBS's image, loop and stinger sources point at files in your unzipped copy
+of this repo. Moving or deleting that folder breaks those sources.
 
-The overlay is live on GitHub Pages: **https://vyper-venom-dev.github.io/vyper-venom-overlay/**
+## Scenes
 
-1. In Aitum Vertical, in every **vertical** scene: add a **Browser** source (create it once, then **Add Existing** in the other scenes).
-   - Leave **Local file** unticked and paste the address above as the URL.
-   - Width **1080**, Height **1920**. Put it at the top of the source list.
-   - Untick **Shutdown source when not visible** and **Refresh browser when scene becomes active**.
-   - Optional: tick **Control audio via OBS** to give the alert sounds their own volume slider.
-2. Keep **TikFinity** open and connected while streaming. Don't add TikFinity's own alert overlay too, or alerts play twice.
+Sources top to bottom (top = in front). Full positions and sizes are in the build guide.
 
-Events come from TikFinity's local connection at `ws://127.0.0.1:21213/`.
-If the online version can't reach TikFinity (`?debug` never says "connected"), use a downloaded copy instead:
-**Code > Download ZIP**, unzip, tick **Local file** and pick `index.html`.
+| Twitch (OBS Scenes dock) | Sources |
+| --- | --- |
+| TW · Starting Soon | VV Twitch Alerts, VV Countdown, Twitch_StartingSoon.png, VV Loop TW |
+| TW · Gameplay | VV Twitch Alerts, Twitch_Gameplay.png, VV Cam, VV Game |
+| TW · Just Chatting | VV Twitch Alerts, TW Chat, Twitch_JustChatting.png, VV Cam, VV Loop TW |
+| TW · BRB | VV Twitch Alerts, Twitch_BRB.png, VV Loop TW |
+| TW · Ending | VV Twitch Alerts, TW Raid Target, TW Next Stream, Twitch_Ending.png, VV Loop TW |
 
-## Test it
+| TikTok (Aitum Vertical dock) | Sources |
+| --- | --- |
+| TT · Starting Soon | VV Alerts, VV Countdown, TikTok_StartingSoon.png, VV Loop TT |
+| TT · Gameplay | VV Alerts, TikTok_Gameplay.png, VV Cam, VV Game, VV Loop TT |
+| TT · Just Chatting | VV Alerts, TikTok_JustChatting.png, VV Cam, VV Loop TT |
+| TT · BRB | VV Alerts, TikTok_BRB.png, VV Loop TT |
+| TT · Ending | VV Alerts, TT Handle, TT Next Live, TikTok_Ending.png, VV Loop TT |
 
-- `?demo` on the end of the address: plays a follow, share and like alert on a loop with fake names.
-- `?debug` on the end of the address: shows a log of what TikFinity sends. Use this if a real follow doesn't trigger an alert.
+## Alert overlay
+
+One page, two modes. Browser sources, **Local file** unticked, at the top of every scene; untick
+**Shutdown source when not visible** and **Refresh browser when scene becomes active**.
+
+| Source | URL | Size | Events from |
+| --- | --- | --- | --- |
+| VV Alerts (TikTok scenes) | `https://vyper-venom-dev.github.io/vyper-venom-overlay/` | 1080 x 1920 | TikFinity, `ws://127.0.0.1:21213/` |
+| VV Twitch Alerts (Twitch scenes) | `https://vyper-venom-dev.github.io/vyper-venom-overlay/?twitch` | 1920 x 1080 | Streamer.bot, `ws://127.0.0.1:8080/` |
+
+- **TikFinity**: keep it open and connected while streaming. Don't add TikFinity's own alert overlay, or alerts play twice.
+- **Streamer.bot**: connect your Twitch Broadcaster account; Servers/Clients > WebSocket Server: 127.0.0.1, port 8080,
+  endpoint `/`, Auto Start on, Authentication off. Keep it open while streaming.
+- TikTok: follow, share, and a like alert every 100 likes. Twitch: follow, sub / resub / gift, bits, raid.
+
+### Test
+
+- `?demo` (TikTok) or `?twitch&demo` (Twitch): fake alerts on a loop.
+- `?debug` or `?twitch&debug`: a log of what TikFinity / Streamer.bot sends. Use it if a real event doesn't play.
 
 Remove them before going live.
 
-## Twitch alerts
-
-Same page with `?twitch` on the end: **https://vyper-venom-dev.github.io/vyper-venom-overlay/?twitch**
-
-- Plays on follows, subs (new, resubs, gifts), bits and raids, top centre of the 1920 x 1080 canvas.
-- Events come from **Streamer.bot** on this PC (`ws://127.0.0.1:8080/`):
-  connect your Twitch account in it, and turn on its WebSocket Server (Auto Start, no Authentication).
-- In OBS, in every Twitch scene: a **Browser** source with that URL, Width **1920**, Height **1080**, at the top of the source list.
-- Test: `?twitch&demo` for fake alerts, `?twitch&debug` for the log.
+If the online page can't reach TikFinity or Streamer.bot (the debug log never says "connected"), tick **Local file**
+and pick `index.html` from the downloaded copy instead (add `?twitch` for the Twitch one).
 
 ## Change settings
 
-Open `index.html` in a text editor and edit the `CONFIG` block near the top:
-- `alertTop`: how far down the screen the alerts sit (px). 160 keeps clear of TikTok's top bar.
-- `likeStep`: likes between like alerts (default 100).
+Open `index.html` and edit the `CONFIG` block near the top:
+- `tiktok.top`: how far down the TikTok screen the alerts sit (px). 160 keeps clear of TikTok's top bar.
+- `tiktok.likeStep`: likes between like alerts (default 100).
+- `twitch.left`, `twitch.top`, `twitch.scale`: where the Twitch alerts sit and how big (default: top centre, 760 px wide).
 - `nameY` (per alert): nudge the viewer's name up or down inside the tag.
 
 ## Updating
 
-Changes pushed here go live on the Pages address in about a minute. Then right-click the Browser source in OBS > **Refresh**.
+- **Alerts and index.html**: changes pushed here go live in a minute or two. Right-click the Browser source in OBS > **Refresh**.
+- **Overlays, loops, stingers, countdown script**: OBS uses your downloaded copy, so download the ZIP again and
+  replace the files in the same folder.

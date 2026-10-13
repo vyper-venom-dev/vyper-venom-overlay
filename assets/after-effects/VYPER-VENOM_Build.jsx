@@ -193,8 +193,10 @@
     // ---- alerts ---------------------------------------------------------------
     function importSound(fileName) {
         try {
+            // next to this script, or in the repo's assets/sounds folder
             var here = File($.fileName).parent;
             var file = new File(here.fsName + "/" + fileName);
+            if (!file.exists) file = new File(here.parent.fsName + "/sounds/" + fileName);
             if (!file.exists) return null;
             var item = app.project.importFile(new ImportOptions(file));
             return item;
@@ -331,7 +333,7 @@
             var sl = outer.layers.add(snd);
             sl.startTime = 0;
         } else {
-            notes.push(opt.name + ": " + opt.sound + " was not found next to the script, so it has no sound yet.");
+            notes.push(opt.name + ": " + opt.sound + " was not found next to the script or in assets/sounds, so it has no sound yet.");
         }
         return outer;
     }
