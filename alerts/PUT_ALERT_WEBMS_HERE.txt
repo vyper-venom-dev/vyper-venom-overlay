@@ -1,1 +1,0 @@
-Put ALERT_FOLLOW.webm, ALERT_SHARE.webm and ALERT_LIKE.webm in this folder.
