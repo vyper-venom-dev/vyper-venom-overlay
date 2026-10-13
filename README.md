@@ -21,6 +21,7 @@ assets/                  backups, not used by the overlay
   overlays/                10 transparent scene overlays (Twitch_*.png 1920x1080, TikTok_*.png 1080x1920)
   profile-pic/             profile picture for Twitch and TikTok (1000x1000)
   sounds/                  stinger and alert sound effects (WAV)
+  obs/                     VV_countdown.lua: Starting Soon countdown as MM:SS (Tools > Scripts > +)
   after-effects/           build script (VYPER-VENOM_Build.jsx), alert layout fix (VYPER-VENOM_Alerts_Fix.jsx),
                            Twitch alert maker (VYPER-VENOM_Twitch_Alerts.jsx)
                            and the portrait used in RING
