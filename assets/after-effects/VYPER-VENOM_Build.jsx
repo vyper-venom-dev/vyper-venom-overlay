@@ -238,7 +238,7 @@
         addPath(tc, [[-430, -55], [430, -55], [400, 55], [-430, 55]]);
         addFill(tc, opt.tagColor);
         var tp = tag.property("ADBE Transform Group").property("ADBE Position");
-        keys(tp, [[0, [-500, Y]], [10, [610, Y]], [14, [590, Y]]]);
+        keys(tp, [[0, [-530, Y]], [10, [580, Y]], [14, [560, Y]]]);
         ease(tp, 75);
 
         // slivers
@@ -252,8 +252,8 @@
             ease(p, 75);
             return s;
         }
-        sliver("Sliver 1", opt.sliver1, 1040, 4);
-        sliver("Sliver 2", opt.sliver2, 1066, 4);
+        sliver("Sliver 1", opt.sliver1, 1010, 4);
+        sliver("Sliver 2", opt.sliver2, 1036, 4);
 
         // light sweep over the tag only
         var sweep = inner.layers.addSolid(C.white, "Tag Sweep", 40, 180, 1, 4);
@@ -261,7 +261,7 @@
         var swt = sweep.property("ADBE Transform Group");
         swt.property("ADBE Rotate Z").setValue(20);
         swt.property("ADBE Opacity").setValue(60);
-        keys(swt.property("ADBE Position"), [[80, [140, Y]], [120, [1040, Y]]]);
+        keys(swt.property("ADBE Position"), [[80, [110, Y]], [120, [1010, Y]]]);
         // matte = a copy of the tag sitting directly above the sweep (works in old and new AE)
         try {
             var m = tag.duplicate();
@@ -306,7 +306,7 @@
         td.tracking = 300;
         td.justification = ParagraphJustification.LEFT_JUSTIFY;
         tdProp.setValue(td);
-        lbl.property("ADBE Transform Group").property("ADBE Position").setValue([180, Y - 72]);
+        lbl.property("ADBE Transform Group").property("ADBE Position").setValue([270, Y - 72]);
         lbl.property("ADBE Text Properties").property("ADBE Text Animators").addProperty("ADBE Text Animator");
         // look everything up fresh after each add (AE invalidates older references)
         function animator() { return lbl.property("ADBE Text Properties").property("ADBE Text Animators").property(1); }

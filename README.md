@@ -20,7 +20,8 @@ assets/                  backups, not used by the overlay
   overlays/                10 transparent scene overlays (Twitch_*.png 1920x1080, TikTok_*.png 1080x1920)
   profile-pic/             profile picture for Twitch and TikTok (1000x1000)
   sounds/                  stinger and alert sound effects (WAV)
-  after-effects/           build script (VYPER-VENOM_Build.jsx) and the portrait used in RING
+  after-effects/           build script (VYPER-VENOM_Build.jsx), alert layout fix (VYPER-VENOM_Alerts_Fix.jsx)
+                           and the portrait used in RING
 ```
 
 ## Use the alert overlay
