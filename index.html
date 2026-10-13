@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>VYPER-VENOM TikTok Alerts</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Chakra+Petch:wght@600&display=swap" rel="stylesheet">
+<style>
+  /* OBS Browser Source: 1080 x 1920, put it on top of every vertical (TikTok) scene */
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: transparent; }
+  #stage { position: absolute; left: 0; top: var(--alert-top); width: 1080px; height: 400px; }
+  video { position: absolute; left: 0; top: 0; width: 1080px; display: none; }
+  #name {
+    position: absolute; left: 290px; width: 680px; height: 110px;
+    display: flex; align-items: center; opacity: 0;
+    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 44px; letter-spacing: 0.04em;
+    color: #F1EDF4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    text-shadow: 0 2px 0 rgba(10,10,13,0.6);
+  }
+  #name.in  { animation: nameIn 0.25s ease-out forwards; }
+  #name.out { animation: nameOut 0.67s ease-in forwards; }
+  @keyframes nameIn  { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: none; } }
+  @keyframes nameOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(300px); } }
+  #debug {
+    position: absolute; left: 20px; bottom: 20px; width: 1040px; max-height: 600px; overflow: hidden;
+    font: 18px/1.35 monospace; color: #9fe; background: rgba(0,0,0,0.75); padding: 12px; display: none; white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <video id="v" playsinline></video>
+  <div id="name"></div>
+</div>
+<div id="debug"></div>
+
+<script>
+/* ============================== SETTINGS ===================================
+   Change these to taste, then save the file.                                   */
+const CONFIG = {
+  // TikFinity's local event connection (TikFinity must be running on this PC)
+  tikfinityUrl: 'ws://127.0.0.1:21213/',
+
+  // where the alert sits on the 1080x1920 TikTok canvas (top edge, in px).
+  // 160 keeps it clear of TikTok's own top bar.
+  alertTop: 160,
+
+  // play the like alert every time total likes pass a multiple of this number
+  likeStep: 100,
+
+  // the three alert videos (exported from After Effects, converted to WebM with alpha)
+  alerts: {
+    follow: { file: 'alerts/ALERT_FOLLOW.webm', nameY: 195, label: (n) => n },
+    share:  { file: 'alerts/ALERT_SHARE.webm',  nameY: 195, label: (n) => n },
+    like:   { file: 'alerts/ALERT_LIKE.webm',   nameY: 125, label: (n, total) => total.toLocaleString() + ' LIKES' }
+  },
+
+  // timing inside each 4 s alert video (matches the After Effects build)
+  nameInAt: 0.25,     // seconds: the tag has landed
+  nameOutAt: 3.0,     // seconds: everything slides out
+  volume: 1.0
+};
+/* ========================================================================== */
+
+const params = new URLSearchParams(location.search);
+const DEBUG = params.has('debug');
+const DEMO  = params.has('demo');
+document.documentElement.style.setProperty('--alert-top', CONFIG.alertTop + 'px');
+
+const video = document.getElementById('v');
+const nameEl = document.getElementById('name');
+const dbg = document.getElementById('debug');
+if (DEBUG) dbg.style.display = 'block';
+function log(...a) {
+  if (!DEBUG) return;
+  dbg.textContent = (a.map(x => typeof x === 'string' ? x : JSON.stringify(x)).join(' ') + '\n' + dbg.textContent).slice(0, 4000);
+}
+
+/* ---------- queue: one alert at a time ---------- */
+const queue = [];
+let playing = false;
+
+function enqueue(type, name, total) {
+  if (!CONFIG.alerts[type]) return;
+  queue.push({ type, name: name || 'Someone', total: total || 0 });
+  log('queued', type, name || '', total || '');
+  if (!playing) next();
+}
+
+function next() {
+  const item = queue.shift();
+  if (!item) { playing = false; return; }
+  playing = true;
+  const a = CONFIG.alerts[item.type];
+  nameEl.className = '';
+  nameEl.style.top = a.nameY + 'px';
+  nameEl.textContent = a.label(item.name, item.total);
+  video.src = a.file;
+  video.volume = CONFIG.volume;
+  video.style.display = 'block';
+  let shownIn = false, shownOut = false;
+  video.ontimeupdate = () => {
+    if (!shownIn && video.currentTime >= CONFIG.nameInAt) { shownIn = true; nameEl.className = 'in'; }
+    if (!shownOut && video.currentTime >= CONFIG.nameOutAt) { shownOut = true; nameEl.className = 'out'; }
+  };
+  const done = () => {
+    video.onended = video.onerror = video.ontimeupdate = null;
+    video.style.display = 'none';
+    nameEl.className = '';
+    nameEl.style.opacity = 0;
+    setTimeout(next, 400);
+  };
+  video.onended = done;
+  video.onerror = () => { log('could not play', a.file); done(); };
+  video.currentTime = 0;
+  video.play().catch(e => { log('play blocked', String(e)); done(); });
+}
+
+/* ---------- TikFinity events ---------- */
+let lastLikeStep = null;
+
+function handle(msg) {
+  // TikFinity sends JSON like {"event":"follow","data":{...}}; accept a few shapes to be safe
+  const ev = String(msg.event || msg.type || msg.eventName || '').toLowerCase();
+  const d = msg.data || msg;
+  const name = d.nickname || d.uniqueId || (d.user && (d.user.nickname || d.user.uniqueId)) || '';
+  const display = String(d.displayType || d.label || '').toLowerCase();
+
+  if (ev === 'follow' || (ev === 'social' && display.includes('follow'))) return enqueue('follow', name);
+  if (ev === 'share'  || (ev === 'social' && display.includes('share')))  return enqueue('share', name);
+  if (ev === 'like') {
+    const total = Number(d.totalLikeCount ?? d.totalLikes ?? 0);
+    if (!total) return;
+    const step = Math.floor(total / CONFIG.likeStep);
+    if (lastLikeStep === null) { lastLikeStep = step; return; }     // first message: just remember
+    if (step > lastLikeStep) { lastLikeStep = step; enqueue('like', name, step * CONFIG.likeStep); }
+  }
+}
+window.vvTest = (type, name, total) => enqueue(type, name || 'TestViewer', total || 1200); // for testing in a browser console
+
+function connect() {
+  let ws;
+  try { ws = new WebSocket(CONFIG.tikfinityUrl); } catch (e) { log('connect failed', String(e)); return setTimeout(connect, 3000); }
+  ws.onopen = () => log('connected to TikFinity');
+  ws.onmessage = (m) => {
+    let msg; try { msg = JSON.parse(m.data); } catch (e) { return; }
+    log('event', (msg.event || msg.type || '?'));
+    handle(msg);
+  };
+  ws.onclose = () => { log('disconnected, retrying in 3 s'); setTimeout(connect, 3000); };
+  ws.onerror = () => ws.close();
+}
+
+if (DEMO) {
+  const demo = [['follow', 'NightOwl_92'], ['share', 'xX_Raptor_Xx'], ['like', 'fan', 1500]];
+  let i = 0;
+  setInterval(() => { const [t, n, tot] = demo[i++ % demo.length]; enqueue(t, n, tot); }, 5500);
+  enqueue('follow', 'NightOwl_92');
+} else {
+  connect();
+}
+</script>
+</body>
+</html>
