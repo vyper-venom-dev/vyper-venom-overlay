@@ -6,11 +6,12 @@ plus a backup of every exported asset.
 ## What's where
 
 ```
-index.html               TikTok alert overlay (OBS Browser Source, 1080 x 1920)
-alerts/                  the three alert videos the overlay plays
+index.html               alert overlay: TikTok (Aitum, 1080 x 1920) and Twitch (?twitch, OBS, 1920 x 1080)
+alerts/                  the alert videos the overlay plays
   ALERT_FOLLOW.webm        1080x400, 4 s, transparent, with sound
   ALERT_SHARE.webm         1080x400, 4 s, transparent, with sound
   ALERT_LIKE.webm          1080x300, 4 s, transparent, with sound
+  ALERT_SUB/BITS/RAID.webm Twitch alerts (until uploaded, the overlay borrows SHARE/FOLLOW/LIKE)
 fonts/                   Orbitron + Chakra Petch (used by the overlay)
 
 assets/                  backups, not used by the overlay
@@ -20,7 +21,8 @@ assets/                  backups, not used by the overlay
   overlays/                10 transparent scene overlays (Twitch_*.png 1920x1080, TikTok_*.png 1080x1920)
   profile-pic/             profile picture for Twitch and TikTok (1000x1000)
   sounds/                  stinger and alert sound effects (WAV)
-  after-effects/           build script (VYPER-VENOM_Build.jsx), alert layout fix (VYPER-VENOM_Alerts_Fix.jsx)
+  after-effects/           build script (VYPER-VENOM_Build.jsx), alert layout fix (VYPER-VENOM_Alerts_Fix.jsx),
+                           Twitch alert maker (VYPER-VENOM_Twitch_Alerts.jsx)
                            and the portrait used in RING
 ```
 
@@ -45,6 +47,16 @@ If the online version can't reach TikFinity (`?debug` never says "connected"), u
 - `?debug` on the end of the address: shows a log of what TikFinity sends. Use this if a real follow doesn't trigger an alert.
 
 Remove them before going live.
+
+## Twitch alerts
+
+Same page with `?twitch` on the end: **https://vyper-venom-dev.github.io/vyper-venom-overlay/?twitch**
+
+- Plays on follows, subs (new, resubs, gifts), bits and raids, top centre of the 1920 x 1080 canvas.
+- Events come from **Streamer.bot** on this PC (`ws://127.0.0.1:8080/`):
+  connect your Twitch account in it, and turn on its WebSocket Server (Auto Start, no Authentication).
+- In OBS, in every Twitch scene: a **Browser** source with that URL, Width **1920**, Height **1080**, at the top of the source list.
+- Test: `?twitch&demo` for fake alerts, `?twitch&debug` for the log.
 
 ## Change settings
 

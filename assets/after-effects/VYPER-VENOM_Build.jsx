@@ -363,7 +363,14 @@
             buildAlert({ name: "ALERT_SHARE",  h: 400, y: 250, tagColor: C.blue, sliver1: C.red,  sliver2: C.blood,
                          label: "SHARED THE STREAM", sound: "ALERT_SHARE.wav" }, folder, ring),
             buildAlert({ name: "ALERT_LIKE",   h: 300, y: 180, tagColor: C.red,  sliver1: C.blue, sliver2: C.blood,
-                         label: "LIKE GOAL", sound: "ALERT_LIKE.wav", burst: true }, folder, ring)
+                         label: "LIKE GOAL", sound: "ALERT_LIKE.wav", burst: true }, folder, ring),
+            // Twitch alerts (played by the overlay's ?twitch mode, events from Streamer.bot)
+            buildAlert({ name: "ALERT_SUB",    h: 400, y: 250, tagColor: C.blue, sliver1: C.red,  sliver2: C.blood,
+                         label: "NEW SUBSCRIBER", sound: "ALERT_SHARE.wav" }, folder, ring),
+            buildAlert({ name: "ALERT_BITS",   h: 400, y: 250, tagColor: C.red,  sliver1: C.blue, sliver2: C.blood,
+                         label: "BITS CHEER", sound: "ALERT_FOLLOW.wav" }, folder, ring),
+            buildAlert({ name: "ALERT_RAID",   h: 300, y: 180, tagColor: C.red,  sliver1: C.blue, sliver2: C.blood,
+                         label: "INCOMING RAID", sound: "ALERT_LIKE.wav", burst: true }, folder, ring)
         ];
 
         for (var i = 0; i < loops.length; i++)

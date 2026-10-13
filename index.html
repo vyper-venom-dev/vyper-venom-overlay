@@ -2,15 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>VYPER-VENOM TikTok Alerts</title>
+<title>VYPER-VENOM Alerts</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Chakra+Petch:wght@600&display=swap" rel="stylesheet">
 <style>
   /* fonts bundled in the repo, so names show in Orbitron even offline (Google Fonts above is the fallback) */
   @font-face { font-family: 'Orbitron'; src: url('fonts/Orbitron-VariableFont_wght.ttf'); font-weight: 400 900; }
   @font-face { font-family: 'Chakra Petch'; src: url('fonts/ChakraPetch-SemiBold.ttf'); font-weight: 600; }
-  /* OBS Browser Source: 1080 x 1920, put it on top of every vertical (TikTok) scene */
-  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: transparent; }
-  #stage { position: absolute; left: 0; top: var(--alert-top); width: 1080px; height: 400px; }
+  html, body { margin: 0; overflow: hidden; background: transparent; }
+  #stage { position: absolute; width: 1080px; height: 400px; transform-origin: 0 0; }
   video { position: absolute; left: 0; top: 0; width: 1080px; display: none; }
   #name {
     position: absolute; left: 290px; width: 680px; height: 110px;
@@ -24,7 +23,7 @@
   @keyframes nameIn  { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: none; } }
   @keyframes nameOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(300px); } }
   #debug {
-    position: absolute; left: 20px; bottom: 20px; width: 1040px; max-height: 600px; overflow: hidden;
+    position: absolute; left: 20px; bottom: 20px; width: 1000px; max-height: 600px; overflow: hidden;
     font: 18px/1.35 monospace; color: #9fe; background: rgba(0,0,0,0.75); padding: 12px; display: none; white-space: pre-wrap;
   }
 </style>
@@ -38,25 +37,33 @@
 
 <script>
 /* ============================== SETTINGS ===================================
-   Change these to taste, then save the file.                                   */
+   One page, two modes:
+     ...vyper-venom-overlay/          TikTok alerts (Aitum vertical scenes, 1080 x 1920), events from TikFinity
+     ...vyper-venom-overlay/?twitch   Twitch alerts (OBS scenes, 1920 x 1080), events from Streamer.bot
+   Add &demo for fake alerts, &debug for a log.                                   */
 const CONFIG = {
-  // TikFinity's local event connection (TikFinity must be running on this PC)
-  tikfinityUrl: 'ws://127.0.0.1:21213/',
-
-  // where the alert sits on the 1080x1920 TikTok canvas (top edge, in px).
-  // 160 keeps it clear of TikTok's own top bar.
-  alertTop: 160,
-
-  // play the like alert every time total likes pass a multiple of this number
-  likeStep: 100,
-
-  // the three alert videos (exported from After Effects, converted to WebM with alpha)
-  alerts: {
-    follow: { file: 'alerts/ALERT_FOLLOW.webm', nameY: 195, label: (n) => n },
-    share:  { file: 'alerts/ALERT_SHARE.webm',  nameY: 195, label: (n) => n },
-    like:   { file: 'alerts/ALERT_LIKE.webm',   nameY: 125, label: (n, total) => total.toLocaleString() + ' LIKES' }
+  tiktok: {
+    url: 'ws://127.0.0.1:21213/',          // TikFinity (must be running on this PC)
+    canvas: [1080, 1920],
+    left: 0, top: 160, scale: 1,            // 160 keeps clear of TikTok's own top bar
+    likeStep: 100,                          // a like alert every time total likes pass a multiple of this
+    alerts: {
+      follow: { file: 'alerts/ALERT_FOLLOW.webm', nameY: 195 },
+      share:  { file: 'alerts/ALERT_SHARE.webm',  nameY: 195 },
+      like:   { file: 'alerts/ALERT_LIKE.webm',   nameY: 125 }
+    }
   },
-
+  twitch: {
+    url: 'ws://127.0.0.1:8080/',            // Streamer.bot WebSocket Server (must be running on this PC)
+    canvas: [1920, 1080],
+    left: 580, top: 10, scale: 0.7037,      // the alert zone at the top centre: 760 px wide
+    alerts: {
+      follow: { file: 'alerts/ALERT_FOLLOW.webm', nameY: 195 },
+      sub:    { file: 'alerts/ALERT_SUB.webm',    nameY: 195, fallback: 'alerts/ALERT_SHARE.webm' },
+      bits:   { file: 'alerts/ALERT_BITS.webm',   nameY: 195, fallback: 'alerts/ALERT_FOLLOW.webm' },
+      raid:   { file: 'alerts/ALERT_RAID.webm',   nameY: 125, fallback: 'alerts/ALERT_LIKE.webm' }
+    }
+  },
   // timing inside each 4 s alert video (matches the After Effects build)
   nameInAt: 0.25,     // seconds: the tag has landed
   nameOutAt: 3.0,     // seconds: everything slides out
@@ -65,9 +72,17 @@ const CONFIG = {
 /* ========================================================================== */
 
 const params = new URLSearchParams(location.search);
+const MODE  = params.has('twitch') ? 'twitch' : 'tiktok';
+const P     = CONFIG[MODE];
 const DEBUG = params.has('debug');
 const DEMO  = params.has('demo');
-document.documentElement.style.setProperty('--alert-top', CONFIG.alertTop + 'px');
+
+document.body.style.width  = P.canvas[0] + 'px';
+document.body.style.height = P.canvas[1] + 'px';
+const stage = document.getElementById('stage');
+stage.style.left = P.left + 'px';
+stage.style.top  = P.top + 'px';
+stage.style.transform = 'scale(' + P.scale + ')';
 
 const video = document.getElementById('v');
 const nameEl = document.getElementById('name');
@@ -75,37 +90,48 @@ const dbg = document.getElementById('debug');
 if (DEBUG) dbg.style.display = 'block';
 function log(...a) {
   if (!DEBUG) return;
-  dbg.textContent = (a.map(x => typeof x === 'string' ? x : JSON.stringify(x)).join(' ') + '\n' + dbg.textContent).slice(0, 4000);
+  dbg.textContent = (a.map(x => typeof x === 'string' ? x : JSON.stringify(x)).join(' ') + '\n' + dbg.textContent).slice(0, 5000);
 }
+log('mode: ' + MODE + ', connecting to ' + P.url);
 
 /* ---------- queue: one alert at a time ---------- */
 const queue = [];
 let playing = false;
 
-function enqueue(type, name, total) {
-  if (!CONFIG.alerts[type]) return;
-  queue.push({ type, name: name || 'Someone', total: total || 0 });
-  log('queued', type, name || '', total || '');
+function enqueue(type, text) {
+  if (!P.alerts[type]) return;
+  queue.push({ type, text: String(text || 'Someone') });
+  log('queued', type, text || '');
   if (!playing) next();
+}
+
+function fitName() {
+  // shrink long names so they stay inside the tag
+  let size = 44;
+  nameEl.style.fontSize = size + 'px';
+  while (nameEl.scrollWidth > nameEl.clientWidth && size > 24) { size -= 2; nameEl.style.fontSize = size + 'px'; }
 }
 
 function next() {
   const item = queue.shift();
   if (!item) { playing = false; return; }
   playing = true;
-  const a = CONFIG.alerts[item.type];
+  const a = P.alerts[item.type];
   nameEl.className = '';
   nameEl.style.top = a.nameY + 'px';
-  nameEl.textContent = a.label(item.name, item.total);
+  nameEl.textContent = item.text;
+  fitName();
   video.src = a.file;
   video.volume = CONFIG.volume;
   video.style.display = 'block';
-  let shownIn = false, shownOut = false;
+  let shownIn = false, shownOut = false, finished = false;
   video.ontimeupdate = () => {
     if (!shownIn && video.currentTime >= CONFIG.nameInAt) { shownIn = true; nameEl.className = 'in'; }
     if (!shownOut && video.currentTime >= CONFIG.nameOutAt) { shownOut = true; nameEl.className = 'out'; }
   };
   const done = () => {
+    if (finished) return;
+    finished = true;
     video.onended = video.onerror = video.ontimeupdate = null;
     video.style.display = 'none';
     nameEl.className = '';
@@ -113,51 +139,116 @@ function next() {
     setTimeout(next, 400);
   };
   video.onended = done;
-  video.onerror = () => { log('could not play', a.file); done(); };
+  video.onerror = () => {
+    // a video that isn't uploaded yet falls back to a similar one
+    if (a.fallback && !video.src.endsWith(a.fallback)) {
+      log('missing', a.file, '- using', a.fallback);
+      video.src = a.fallback;
+      video.play().catch(startFailed);
+      return;
+    }
+    log('could not play', a.file); done();
+  };
+  // a missing file is handled by onerror above; anything else (e.g. autoplay blocked) ends this alert
+  const startFailed = (e) => { if (e && e.name === 'NotSupportedError') return; log('play blocked', String(e)); done(); };
   video.currentTime = 0;
-  video.play().catch(e => { log('play blocked', String(e)); done(); });
+  video.play().catch(startFailed);
 }
 
-/* ---------- TikFinity events ---------- */
+/* ---------- TikTok events (TikFinity) ---------- */
 let lastLikeStep = null;
 
-function handle(msg) {
+function handleTikTok(msg) {
   // TikFinity sends JSON like {"event":"follow","data":{...}}; accept a few shapes to be safe
   const ev = String(msg.event || msg.type || msg.eventName || '').toLowerCase();
   const d = msg.data || msg;
   const name = d.nickname || d.uniqueId || (d.user && (d.user.nickname || d.user.uniqueId)) || '';
   const display = String(d.displayType || d.label || '').toLowerCase();
+  log('event', ev);
 
   if (ev === 'follow' || (ev === 'social' && display.includes('follow'))) return enqueue('follow', name);
   if (ev === 'share'  || (ev === 'social' && display.includes('share')))  return enqueue('share', name);
   if (ev === 'like') {
     const total = Number(d.totalLikeCount ?? d.totalLikes ?? 0);
     if (!total) return;
-    const step = Math.floor(total / CONFIG.likeStep);
+    const step = Math.floor(total / P.likeStep);
     if (lastLikeStep === null) { lastLikeStep = step; return; }     // first message: just remember
-    if (step > lastLikeStep) { lastLikeStep = step; enqueue('like', name, step * CONFIG.likeStep); }
+    if (step > lastLikeStep) { lastLikeStep = step; enqueue('like', (step * P.likeStep).toLocaleString() + ' LIKES'); }
   }
 }
-window.vvTest = (type, name, total) => enqueue(type, name || 'TestViewer', total || 1200); // for testing in a browser console
+
+/* ---------- Twitch events (Streamer.bot) ---------- */
+const TWITCH_EVENTS = ['Follow', 'Sub', 'ReSub', 'GiftSub', 'GiftBomb', 'Cheer', 'Raid'];
+
+function twitchName(d) {
+  const u = d.user || {}, m = d.message || {};
+  return d.user_name || d.userName || d.displayName || d.display_name || u.name || u.display_name || u.login ||
+         m.displayName || m.username || d.from_broadcaster_user_name || d.from_broadcaster_user_login || d.user_login || '';
+}
+const num = (...v) => { for (const x of v) if (x !== undefined && x !== null && x !== '' && !isNaN(x)) return Number(x); return 0; };
+
+function handleTwitch(msg) {
+  if (msg.request === 'Hello' || msg.info) {
+    log('connected to Streamer.bot');
+    if (msg.authentication) log('Streamer.bot wants a password: turn off Authentication in its WebSocket Server settings');
+    return;
+  }
+  if (msg.id === 'vv-sub') { log('subscribed:', msg.status || 'ok'); return; }
+  const ev = msg.event || {};
+  if (ev.source !== 'Twitch') return;
+  const d = msg.data || {};
+  const name = twitchName(d);
+  log('event', ev.type, JSON.stringify(d).slice(0, 300));
+
+  switch (ev.type) {
+    case 'Follow':   return enqueue('follow', name);
+    case 'Sub':      return enqueue('sub', name);
+    case 'ReSub': {
+      const months = num(d.cumulativeMonths, d.cumulative_months, d.months);
+      return enqueue('sub', months ? name + ' · ' + months + ' MONTHS' : name);
+    }
+    case 'GiftSub':
+      if (d.fromSubBomb || d.fromGiftBomb || d.isFromSubBomb) return;      // the GiftBomb alert covers these
+      return enqueue('sub', name + ' · GIFTED');
+    case 'GiftBomb': {
+      const n = num(d.gifts, d.total, d.count, d.giftCount);
+      return enqueue('sub', name + (n ? ' · ' + n + ' GIFTED' : ' · GIFTED'));
+    }
+    case 'Cheer': {
+      const bits = num(d.bits, d.message && d.message.bits, d.amount);
+      return enqueue('bits', bits ? name + ' · ' + bits.toLocaleString() + ' BITS' : name);
+    }
+    case 'Raid': {
+      const v = num(d.viewers, d.viewerCount, d.viewer_count);
+      return enqueue('raid', v ? name + ' · ' + v + ' RAIDERS' : name);
+    }
+  }
+}
+
+window.vvTest = (type, text) => enqueue(type, text || 'TestViewer');   // for testing in a browser console
 
 function connect() {
   let ws;
-  try { ws = new WebSocket(CONFIG.tikfinityUrl); } catch (e) { log('connect failed', String(e)); return setTimeout(connect, 3000); }
-  ws.onopen = () => log('connected to TikFinity');
+  try { ws = new WebSocket(P.url); } catch (e) { log('connect failed', String(e)); return setTimeout(connect, 3000); }
+  ws.onopen = () => {
+    if (MODE === 'tiktok') { log('connected to TikFinity'); return; }
+    ws.send(JSON.stringify({ request: 'Subscribe', id: 'vv-sub', events: { Twitch: TWITCH_EVENTS } }));
+  };
   ws.onmessage = (m) => {
     let msg; try { msg = JSON.parse(m.data); } catch (e) { return; }
-    log('event', (msg.event || msg.type || '?'));
-    handle(msg);
+    (MODE === 'twitch' ? handleTwitch : handleTikTok)(msg);
   };
   ws.onclose = () => { log('disconnected, retrying in 3 s'); setTimeout(connect, 3000); };
   ws.onerror = () => ws.close();
 }
 
 if (DEMO) {
-  const demo = [['follow', 'NightOwl_92'], ['share', 'xX_Raptor_Xx'], ['like', 'fan', 1500]];
+  const demo = MODE === 'twitch'
+    ? [['follow', 'NightOwl_92'], ['sub', 'xX_Raptor_Xx · 6 MONTHS'], ['bits', 'GhostRider · 500 BITS'], ['raid', 'BigStreamer · 42 RAIDERS']]
+    : [['follow', 'NightOwl_92'], ['share', 'xX_Raptor_Xx'], ['like', '1,500 LIKES']];
   let i = 0;
-  setInterval(() => { const [t, n, tot] = demo[i++ % demo.length]; enqueue(t, n, tot); }, 5500);
-  enqueue('follow', 'NightOwl_92');
+  setInterval(() => { const [t, n] = demo[i++ % demo.length]; enqueue(t, n); }, 5500);
+  const [t0, n0] = demo[i++]; enqueue(t0, n0);
 } else {
   connect();
 }
