@@ -17,17 +17,20 @@ alerts/                    the alert videos the overlay plays (VP9 WebM, transpa
   ALERT_SUB.webm             1080x400   Twitch sub / resub / gift
   ALERT_BITS.webm            1080x400   Twitch bits
   ALERT_RAID.webm            1080x300   Twitch raid
-fonts/                     Orbitron + Chakra Petch (used by the overlay; install them on the PC for OBS text too)
+fonts/                     Orbitron + Chakra Petch (used by the overlay; install them on the PC for OBS text too), with their OFL licences
 
 assets/                    used by OBS from a downloaded copy of this repo
   overlays/                  10 transparent scene overlays: Twitch_*.png (1920x1080), TikTok_*.png (1080x1920)
   loops/                     BG_LOOP_TW.mp4, BG_LOOP_TT.mp4: 10 s seamless backgrounds (Media Source, Loop on)
   stinger/                   STINGER_TW.webm, STINGER_TT.webm: Stinger transition, Transition Point 600 ms
   obs/                       VV_countdown.lua: Starting Soon countdown as MM:SS (Tools > Scripts > +)
+                             VYPER-VENOM_OBS_scenes.json: OBS scene collection backup (Scene Collection > Import)
   profile-pic/               profile picture for Twitch and TikTok (1000x1000; use the non-transparent one)
   logo/                      LOGO_REVEAL.webm
   sounds/                    stinger and alert sound effects (WAV)
-  after-effects/             VYPER-VENOM_Build.jsx       builds the loops and all six alerts
+  after-effects/             VYPER-VENOM_Motion.aep      the After Effects project (relink footage to face_venom.png
+                                                         here and the WAVs in assets/sounds)
+                             VYPER-VENOM_Build.jsx       builds the loops and all six alerts
                              VYPER-VENOM_Alerts_Fix.jsx  layout fix for alerts built before 13 Oct
                              VYPER-VENOM_Twitch_Alerts.jsx  makes sub/bits/raid from finished alerts
                              face_venom.png              the portrait used in the RING comp
