@@ -27,12 +27,15 @@ assets/                    used by OBS from a downloaded copy of this repo
                              VYPER-VENOM_OBS_scenes.json: OBS scene collection backup (Scene Collection > Import)
   profile-pic/               profile picture for Twitch and TikTok (1000x1000; use the non-transparent one)
   logo/                      LOGO_REVEAL.webm
+  logo-wordmark/             faceless logo: VYPER-VENOM_Wordmark.png (transparent, 1200x1200),
+                             _ProfilePic.png (1000x1000) and .svg (needs Orbitron installed)
   sounds/                    stinger and alert sound effects (WAV)
   after-effects/             VYPER-VENOM_Motion.aep      the After Effects project (relink footage to face_venom.png
                                                          here and the WAVs in assets/sounds)
                              VYPER-VENOM_Build.jsx       builds the loops and all six alerts
                              VYPER-VENOM_Alerts_Fix.jsx  layout fix for alerts built before 13 Oct
                              VYPER-VENOM_Twitch_Alerts.jsx  makes sub/bits/raid from finished alerts
+                             VYPER-VENOM_Wordmark.jsx    builds the faceless logo with its reveal animation
                              face_venom.png              the portrait used in the RING comp
 ```
 

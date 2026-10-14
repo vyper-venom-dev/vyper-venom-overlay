@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="1200" height="1200"><defs><clipPath id="t"><rect x="0" y="0" width="600" height="232"/></clipPath><clipPath id="m"><rect x="0" y="232" width="600" height="12"/></clipPath><clipPath id="b"><rect x="0" y="244" width="600" height="80"/></clipPath></defs>
+<polygon points="70,120 500,120 530,150 530,480 100,480 70,450" fill="#16141C" stroke="#E3132B" stroke-width="6"/>
+<polyline points="40,170 40,90 120,90" fill="none" stroke="#2E55FF" stroke-width="6"/><polyline points="560,430 560,510 480,510" fill="none" stroke="#2E55FF" stroke-width="6"/>
+<g text-anchor="middle" font-family="Orbitron" font-weight="900" font-size="86" letter-spacing="2">
+<text x="304" y="268" fill="#2E55FF" opacity=".9">VYPER</text><text x="296" y="268" fill="#E3132B" opacity=".9">VYPER</text>
+<text x="300" y="268" fill="#F1EDF4" clip-path="url(#t)">VYPER</text><text x="310" y="268" fill="#F1EDF4" clip-path="url(#m)">VYPER</text><text x="300" y="268" fill="#F1EDF4" clip-path="url(#b)">VYPER</text></g>
+<polygon points="168,300 452,300 434,364 150,364" fill="#E3132B"/>
+<text x="301" y="349" text-anchor="middle" font-family="Orbitron" font-weight="800" font-size="42" fill="#F1EDF4" letter-spacing="16">VENOM</text>
+<polygon points="287,364 315,364 301,398" fill="#E3132B"/>
+<rect x="100" y="440" width="70" height="8" fill="#E3132B"/><rect x="180" y="440" width="24" height="8" fill="#2E55FF"/></svg>
